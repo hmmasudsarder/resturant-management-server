@@ -64,7 +64,7 @@ async function run() {
   
     app.post('/purchaseProduct', async(req, res) => {
       const purchase = req.body;
-      // console.log(purchase)
+      console.log(purchase)
       const result = await orderCollection.insertOne(purchase);
       res.send(result);
     });
