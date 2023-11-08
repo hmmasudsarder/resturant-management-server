@@ -28,6 +28,8 @@ async function run() {
     await client.connect();
 
     const productCollection = client.db('restaurant').collection('products');
+    const orderCollection = client.db('restaurant').collection('purchase');
+    const userCollection = client.db('restaurant').collection('user');
 
     app.get('/allProducts', async(req, res) => {
       const cursor = productCollection.find();
@@ -35,16 +37,36 @@ async function run() {
       res.send(result);
     })
     app.get('/products', async(req, res) =>{
-      // const query = { order: { $lt: 24 } };
       const cursor = productCollection.find().sort({ orders: -1 }).limit(6)
       const result = await cursor.toArray();
       res.send(result);
     });
+
     app.get('/products/:id', async(req, res) => {
       const id = req.params.id;
       const query = {_id: new ObjectId(id)};
       const result = await productCollection.findOne(query);
       res.send(result)
+    });
+
+    app.get('/purchase/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await productCollection.findOne(query);
+      res.send(result);
+    });
+  
+    app.post('/purchaseProduct', async(req, res) => {
+      const purchase = req.body;
+      // console.log(purchase)
+      const result = await orderCollection.insertOne(purchase);
+      res.send(result);
+    });
+    
+    app.post('/user', async(req, res) => {
+      const user = req.body;
+      const result = await userCollection.insertOne(user);
+      res.send(result);
     })
 
     // Send a ping to confirm a successful connection
