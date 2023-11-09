@@ -37,7 +37,7 @@ async function run() {
       res.send(result);
     })
     app.get('/products', async(req, res) =>{
-      const cursor = productCollection.find().sort({ orders: -1 }).limit(6)
+      const cursor = productCollection.find().sort({orders: "desc"}).limit(6)
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -56,6 +56,27 @@ async function run() {
       res.send(result);
     });
 
+    app.get('/buy/:email', async(req, res) => {
+      const client = req.params.email;
+      const query = {email: client};
+      const cursor = orderCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+    app.get('/myFood/:email', async(req, res) => {
+      const email = req.params.email;
+      const query = {email: email};
+      const cursor = productCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get('/update/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await productCollection.findOne(query);
+      res.send(result);
+    })
     app.post('/newItem', async(req, res) => {
       const item = req.body;
       const result = await productCollection.insertOne(item);
@@ -64,7 +85,7 @@ async function run() {
   
     app.post('/purchaseProduct', async(req, res) => {
       const purchase = req.body;
-      console.log(purchase)
+      // console.log(purchase)
       const result = await orderCollection.insertOne(purchase);
       res.send(result);
     });
@@ -72,6 +93,33 @@ async function run() {
     app.post('/user', async(req, res) => {
       const user = req.body;
       const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
+    app.put('/update/:id', async(req, res) =>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
+      const option = {upsert: true}
+      const updateItem = req.body;
+      const food ={
+        $set: {
+          name: updateItem.name,
+          img: updateItem.img, food_category: updateItem.food_category,
+          quantity: updateItem.quantity,
+          price: updateItem.price,
+          country: updateItem.country,
+          description: updateItem.description,
+          orders: updateItem.orders
+        }
+      }
+      
+      const result = await productCollection.updateOne(filter, food, option);
+      res.send(result)
+    })
+
+    app.delete('/order/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await orderCollection.deleteOne(query);
       res.send(result);
     })
 
